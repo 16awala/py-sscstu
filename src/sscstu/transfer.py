@@ -29,7 +29,7 @@ def _using_mem_ephemeral():
 def _using_async_fstreams():
     raise NotImplementedError()
 
-def transfer(source: [Storage, str], destination: [Storage, str], source_basepath=None, destination_prefix=""):
+def transfer(source: [Storage, str], destination: [Storage, str], source_basepath=None, destination_prefix="", delete_source=False):
     if source_basepath is None:
         raise ValueError("Must specify a base search path for source Storage object")
-    return _using_local_ehpemeral(source, source.search(source_basepath), destination, destination_prefix=destination_prefix)
+    return _using_local_ehpemeral(source, source.search(source_basepath), destination, destination_prefix=destination_prefix, delete_source=delete_source)
