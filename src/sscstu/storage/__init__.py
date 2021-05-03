@@ -1,1 +1,1 @@
-__all__ = ["storage"]
+__all__ = ["local", "s3"]
