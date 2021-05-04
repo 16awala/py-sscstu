@@ -7,7 +7,7 @@ import tempfile
 def _using_local_ehpemeral(
         source: Storage,
         objects: [list,StorageSearchIter],
-        destination: Storage,
+        destination: [list,Storage],
         delete_source=False,
         destination_prefix = "",
         continue_on_error=False):
@@ -17,14 +17,17 @@ def _using_local_ehpemeral(
                 print(f"Transfer {o} from {source} to {destination}")
                 tmppath = tmpdir + str(uuid.uuid4())
                 source.get(o, tmppath)
-                if type(o) in destination.ItemTypes:
-                    if not destination.put(o, tmppath, prefix=destination_prefix):
-                        raise Exception(f"Failed to put {o} from {tmppath}")
-                else:
-                    # Use from_file on most preferred
-                    if not destination.put(type(destination.ItemTypes[0]).from_file(tmppath, name=o.name), tmppath, prefix=destination_prefix):
-                        os.remove(tmppath)
-                        raise Exception(f"Failed to put {o} from {tmppath}")
+                dests = destination if isinstance(destination, list) else [destination]
+
+                for dest in dests:
+                    if type(o) in dest.ItemTypes:
+                        if not dest.put(o, tmppath, prefix=destination_prefix) and not continue_on_error:
+                            raise Exception(f"Failed to put {o} from {tmppath}")
+                    else:
+                        # Use from_file on most preferred
+                        if not destination.put(type(destination.ItemTypes[0]).from_file(tmppath, name=o.name), tmppath, prefix=destination_prefix) and not continue_on_error:
+                            os.remove(tmppath)
+                            raise Exception(f"Failed to put {o} from {tmppath}")
                 os.remove(tmppath)
                 if delete_source:
                     if not source.delete(o):
@@ -41,7 +44,7 @@ def _using_async_fstreams():
 
 def transfer(
         source: [Storage, str],
-        destination: [Storage, str],
+        destination: [Storage, list, str],
         source_basepath=None,
         destination_prefix="",
         delete_source=False,
@@ -59,7 +62,7 @@ def transfer(
     delete_source - On successful transfer from source to destination, should the file be deleted from source? Default: False
     continue_on_error - If an object fails to be transferred, should we move on to try other objects? If False, raise exception on first failure. Default: False
     buffer_type - Type of buffer to use for file transfer.
-    buffer_size
+    buffer_size - Intended to limit the footprint of memory-based buffers
 
     Returns
     -------
@@ -75,8 +78,11 @@ def transfer(
             source.search(source_basepath),
             destination,
             destination_prefix=destination_prefix,
-            delete_source=delete_source)
+            delete_source=delete_source,
+            continue_on_error=continue_on_error)
     elif buffer_type == 'memory':
         raise NotImplementedError()
     elif buffer_type == 'stream':
         raise NotImplementedError()
+    else:
+        raise ValueError(f"Unknown buffer type: {buffer_type}")
