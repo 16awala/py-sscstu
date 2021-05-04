@@ -108,3 +108,4 @@ pip-selfcheck.json
 test.py
 _build
 _static
+build.sh
