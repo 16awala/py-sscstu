@@ -22,7 +22,7 @@ copyright = '2021, 16awala'
 author = '16awala'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.2'
+release = '0.0.4'
 
 
 # -- General configuration ---------------------------------------------------
