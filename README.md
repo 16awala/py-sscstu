@@ -10,7 +10,7 @@ from sscstu.storage.s3 import S3Storage, S3StorageItem
 from sscstu.transfer import transfer
 
 src = S3Storage(bucket_name='my-bucket')
-dest = src = S3Storage(bucket_name='my-other-bucket')
+dest = S3Storage(bucket_name='my-other-bucket')
 transfer(src, dest, source_basepath="Foldername", destination_prefix="Foldername")
 
 ```
